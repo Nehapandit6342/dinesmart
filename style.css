@@ -58,3 +58,26 @@ footer {
   text-align: center;
   padding: 15px;
 }
+.menu-section {
+  background-color: #fefefe;
+  margin: 30px auto;
+  padding: 20px;
+  width: 80%;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.menu-section h2 {
+  color: #c0392b;
+  margin-bottom: 15px;
+}
+
+.menu-section ul {
+  list-style-type: square;
+  padding-left: 20px;
+}
+
+.menu-section ul li {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
