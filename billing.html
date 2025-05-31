@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Billing - DineSmart</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .billing-container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 25px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .billing-container h2 {
+      text-align: center;
+      color: #c0392b;
+      margin-bottom: 20px;
+    }
+
+    .billing-container label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .billing-container input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .billing-container button {
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .result {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Billing</h1>
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="viewmenu.html">View Menu</a></li>
+      <li><a href="booktable.html">Book Table</a></li>
+      <li><a href="admin-login.html">Admin Login</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <div class="billing-container">
+    <h2>Generate Bill</h2>
+    
+    <label for="item">Item Name</label>
+    <input type="text" id="item" placeholder="e.g., Chicken Momo">
+
+    <label for="price">Price per Item (Rs.)</label>
+    <input type="number" id="price" placeholder="e.g., 140">
+
+    <label for="quantity">Quantity</label>
+    <input type="number" id="quantity" placeholder="e.g., 2">
+
+    <button onclick="generateBill()">Calculate Total</button>
+    <button onclick="downloadPDF()">Download PDF</button>
+
+    <div class="result" id="result"></div>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2025 DineSmart Restaurant. All rights reserved.</p>
+</footer>
+
+<!-- 📄 jsPDF CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+let lastBill = {};
+
+function generateBill() {
+  const item = document.getElementById('item').value;
+  const price = parseFloat(document.getElementById('price').value);
+  const qty = parseInt(document.getElementById('quantity').value);
+  const result = document.getElementById('result');
+
+  if (!item || isNaN(price) || isNaN(qty)) {
+    result.textContent = "Please enter valid item, price, and quantity.";
+    return;
+  }
+
+  const total = price * qty;
+  result.textContent = `Total bill for ${qty} x ${item} is Rs. ${total.toFixed(2)}`;
+
+  // Store last bill data
+  lastBill = {
+    item,
+    price,
+    qty,
+    total
+  };
+}
+
+function downloadPDF() {
+  if (!lastBill.item) {
+    alert("Please calculate the bill first!");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("DineSmart Restaurant - Customer Bill", 20, 20);
+  doc.setFontSize(12);
+  doc.text(`Item: ${lastBill.item}`, 20, 40);
+  doc.text(`Price per Item: Rs. ${lastBill.price}`, 20, 50);
+  doc.text(`Quantity: ${lastBill.qty}`, 20, 60);
+  doc.text(`----------------------------------`, 20, 70);
+  doc.text(`Total Amount: Rs. ${lastBill.total.toFixed(2)}`, 20, 80);
+
+  doc.save("dinesmart-bill.pdf");
+}
+</script>
+
+</body>
+</html>
