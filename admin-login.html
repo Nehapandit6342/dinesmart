@@ -68,15 +68,32 @@
 <main>
   <div class="login-container">
     <h2>Admin Login</h2>
-    <form action="admin-dashboard.html" method="post">
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required>
+    <form onsubmit="return handleLogin()">
+  <label for="username">Username</label>
+  <input type="text" id="username" required>
 
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required>
+  <label for="password">Password</label>
+  <input type="password" id="password" required>
 
-      <button type="submit">Login</button>
-    </form>
+  <button type="submit">Login</button>
+</form>
+
+<script>
+function handleLogin() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  // TEMPORARY: default login
+  if (username === "admin" && password === "admin123") {
+    window.location.href = "admin-dashboard.html";
+  } else {
+    alert("Invalid login. Try admin / admin123");
+  }
+
+  return false; // Prevent form submission
+}
+</script>
+
   </div>
 </main>
 
