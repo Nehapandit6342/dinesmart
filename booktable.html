@@ -74,7 +74,8 @@
 </header>
 
 <main>
-  <form class="booking-form" onsubmit="checkAvailability(event)">
+  <form class="booking-form" action="save_booking.php" method="POST">
+
     <h2>Table Reservation</h2>
     <label for="name">Your Name</label>
     <input type="text" id="name" required>
