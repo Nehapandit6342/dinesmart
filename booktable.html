@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Table - DineSmart</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .booking-form {
+      background-color: #fff;
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .booking-form h2 {
+      color: #c0392b;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .booking-form label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    .booking-form input,
+    .booking-form select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .booking-form button {
+      width: 100%;
+      background-color: #27ae60;
+      color: white;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #bookNowBtn {
+      display: none;
+      background-color: #2980b9;
+      margin-top: 10px;
+    }
+    .status {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .available {
+      color: green;
+    }
+    .full {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Book a Table</h1>
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="viewmenu.html">View Menu</a></li>
+      <li><a href="billing.html">Billing</a></li>
+      <li><a href="admin-login.html">Admin Login</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <form class="booking-form" onsubmit="checkAvailability(event)">
+    <h2>Table Reservation</h2>
+    <label for="name">Your Name</label>
+    <input type="text" id="name" required>
+
+    <label for="date">Date</label>
+    <input type="date" id="date" required>
+
+    <label for="time">Time</label>
+    <input type="time" id="time" required>
+
+    <label for="guests">No. of Guests</label>
+    <select id="guests" required>
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5+</option>
+    </select>
+
+    <button type="submit">Check Availability</button>
+    <div class="status" id="status"></div>
+
+    <button id="bookNowBtn" onclick="finalBook(event)">Book Now</button>
+  </form>
+</main>
+
+<footer>
+  <p>&copy; 2025 DineSmart Restaurant. All rights reserved.</p>
+</footer>
+
+<script>
+function checkAvailability(event) {
+  event.preventDefault();
+  const status = document.getElementById('status');
+  const bookBtn = document.getElementById('bookNowBtn');
+  const random = Math.random();
+
+  if (random > 0.5) {
+    status.textContent = "✅ Table is available! Please click 'Book Now' to confirm.";
+    status.className = "status available";
+    bookBtn.style.display = "block";
+  } else {
+    status.textContent = "❌ Sorry, tables are full at this time.";
+    status.className = "status full";
+    bookBtn.style.display = "none";
+  }
+}
+
+function finalBook(event) {
+  event.preventDefault();
+  alert("✅ Your table has been booked successfully!");
+}
+</script>
+
+</body>
+</html>
