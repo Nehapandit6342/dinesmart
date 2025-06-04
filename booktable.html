@@ -76,31 +76,32 @@
 <main>
   <form class="booking-form" action="save_booking.php" method="POST">
 
-    <h2>Table Reservation</h2>
-    <label for="name">Your Name</label>
-    <input type="text" id="name" required>
+  <h2>Table Reservation</h2>
+  <label for="name">Your Name</label>
+  <input type="text" id="name" name="name" required>
 
-    <label for="date">Date</label>
-    <input type="date" id="date" required>
+  <label for="date">Date</label>
+  <input type="date" id="date" name="date" required>
 
-    <label for="time">Time</label>
-    <input type="time" id="time" required>
+  <label for="time">Time</label>
+  <input type="time" id="time" name="time" required>
 
-    <label for="guests">No. of Guests</label>
-    <select id="guests" required>
-      <option value="">Select</option>
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5+</option>
-    </select>
+  <label for="guests">No. of Guests</label>
+  <select id="guests" name="guests" required>
+    <option value="">Select</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5+</option>
+  </select>
 
-    <button type="submit">Check Availability</button>
-    <div class="status" id="status"></div>
+  <button type="button" onclick="checkAvailability(event)">Check Availability</button>
+  <div class="status" id="status"></div>
 
-    <button id="bookNowBtn" onclick="finalBook(event)">Book Now</button>
-  </form>
+  <button id="bookNowBtn" type="submit" style="display:none;">Book Now</button>
+</form>
+
 </main>
 
 <footer>
@@ -109,7 +110,6 @@
 
 <script>
 function checkAvailability(event) {
-  event.preventDefault();
   const status = document.getElementById('status');
   const bookBtn = document.getElementById('bookNowBtn');
   const random = Math.random();
@@ -125,10 +125,6 @@ function checkAvailability(event) {
   }
 }
 
-function finalBook(event) {
-  event.preventDefault();
-  alert("✅ Your table has been booked successfully!");
-}
 </script>
 
 </body>
