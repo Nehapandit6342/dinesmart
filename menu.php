@@ -133,7 +133,6 @@ $result = $conn->query($sql);
     <ul>
       <li><a href="index.html">Home</a></li>
       <li><a href="booktable.html">Book Table</a></li>
-      <li><a href="billing.php">Billing</a></li>
       <li><a href="admin-login.html">Admin Login</a></li>
     </ul>
   </nav>

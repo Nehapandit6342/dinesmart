@@ -92,6 +92,12 @@ $items = $conn->query("SELECT id, name, price FROM menu_items ORDER BY name");
 
 <main>
   <div class="billing-container">
+    <label for="booking-token">Booking Token</label>
+<input type="text" id="booking-token" placeholder="Enter Booking Token" maxlength="6" style="text-transform:uppercase;">
+<button class="btn" onclick="verifyToken()">Verify Token</button>
+
+<div id="token-message" style="margin:10px 0; font-weight:bold;"></div>
+
     <h2>Generate Customer Bill</h2>
 
     <div>
@@ -132,7 +138,45 @@ $items = $conn->query("SELECT id, name, price FROM menu_items ORDER BY name");
 <script>
 let billItems = [];
 
+function verifyToken() {
+  const token = document.getElementById('booking-token').value.trim().toUpperCase();
+  const msg = document.getElementById('token-message');
+
+  if (!token) {
+    msg.textContent = "Please enter a booking token.";
+    msg.style.color = "red";
+    return;
+  }
+
+  fetch('verify_token.php?token=' + token)
+    .then(response => response.json())
+    .then(data => {
+      if (data.valid) {
+        msg.textContent = `Token valid! Name: ${data.name}, Phone: ${data.phone}`;
+        msg.style.color = "green";
+        window.verifiedToken = token;
+        window.verifiedName = data.name;
+        window.verifiedPhone = data.phone; // ✅ NEW
+      } else {
+        msg.textContent = "Invalid token!";
+        msg.style.color = "red";
+        window.verifiedToken = null;
+        window.verifiedName = null;
+        window.verifiedPhone = null;
+      }
+    })
+    .catch(err => {
+      msg.textContent = "Error verifying token.";
+      msg.style.color = "red";
+      console.error(err);
+    });
+}
+
 function addItem() {
+   if (!window.verifiedToken) {
+    alert("Please verify your booking token before adding items.");
+    return;
+  }
   const select = document.getElementById("item-select");
   const qty = parseInt(document.getElementById("quantity").value);
   const id = select.value;
@@ -171,8 +215,17 @@ function removeItem(index) {
   billItems.splice(index, 1);
   updateTable();
 }
-
 function downloadPDF() {
+  if (!window.verifiedToken) {
+    alert("Please verify your booking token before downloading the bill.");
+    return;
+  }
+
+  if (billItems.length === 0) {
+    alert("Please add items to the bill before downloading.");
+    return;
+  }
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   let y = 20;
@@ -180,6 +233,9 @@ function downloadPDF() {
   doc.setFontSize(16);
   doc.text("DineSmart Restaurant - Customer Bill", 20, y); y += 10;
   doc.setFontSize(12);
+  doc.text(`Booking Token: ${window.verifiedToken}`, 20, y); y += 8;
+  doc.text(`Customer Name: ${window.verifiedName}`, 20, y); y += 8;
+  doc.text(`Phone Number: ${window.verifiedPhone}`, 20, y); y += 10;
 
   billItems.forEach((item, i) => {
     doc.text(`${i + 1}. ${item.name} - Rs. ${item.price} x ${item.qty} = Rs. ${item.total.toFixed(2)}`, 20, y);
@@ -192,6 +248,8 @@ function downloadPDF() {
 
   doc.save("DineSmart_Bill.pdf");
 }
+
+
 </script>
 
 </body>

@@ -67,7 +67,7 @@
     <ul>
       <li><a href="index.html">Home</a></li>
        <li><a href="menu.php">View Menu</a></li>
-       <li><a href="billing.php">Billing</a></li>
+       <li><a href="admin-login.html">Admin Login</a></li>
     </ul>
   </nav>
 </header>
@@ -87,6 +87,7 @@
 
   <label for="guests">No. of Guests</label>
   <select id="guests" name="guests" required>
+
     <option value="">Select</option>
     <option value="1">1</option>
     <option value="2">2</option>
@@ -94,6 +95,10 @@
     <option value="4">4</option>
     <option value="5">5+</option>
   </select>
+  <label for="phone">Phone Number</label>
+  <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" placeholder="Enter 10-digit phone number" required>
+  
+
 
   <button type="button" onclick="checkAvailability(event)">Check Availability</button>
   <div class="status" id="status"></div>
@@ -109,22 +114,43 @@
 
 <script>
 function checkAvailability(event) {
-  const status = document.getElementById('status');
-  const bookBtn = document.getElementById('bookNowBtn');
-  const random = Math.random();
+  event.preventDefault();
 
-  if (random > 0.5) {
-    status.textContent = "✅ Table is available! Please click 'Book Now' to confirm.";
-    status.className = "status available";
-    bookBtn.style.display = "block";
-  } else {
-    status.textContent = "❌ Sorry, tables are full at this time.";
-    status.className = "status full";
-    bookBtn.style.display = "none";
+  const name = document.getElementById('name').value;
+  const date = document.getElementById('date').value;
+  const time = document.getElementById('time').value;
+  const guests = document.getElementById('guests').value;
+  const phone = document.getElementById('phone').value;
+
+  if (!name || !date || !time || !guests || !phone) {
+    alert("Please fill in all fields.");
+    return;
   }
-}
 
+  fetch('check_availability.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `date=${date}&time=${time}`
+  })
+  .then(res => res.text())
+  .then(data => {
+    const status = document.getElementById('status');
+    const bookBtn = document.getElementById('bookNowBtn');
+
+    if (data === 'available') {
+      status.textContent = "✅ Table is available! Click 'Book Now' to confirm.";
+      status.className = "status available";
+      bookBtn.style.display = "block";
+    } else {
+      status.textContent = "❌ Sorry, tables are full at this time.";
+      status.className = "status full";
+      bookBtn.style.display = "none";
+    }
+  })
+  .catch(err => console.error("Error checking availability:", err));
+}
 </script>
+
 
 </body>
 </html>
