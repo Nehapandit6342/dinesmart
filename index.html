@@ -1,32 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>DineSmart - Home</title>
+  <meta charset="UTF-8" />
+  <title>Restaurant Reservation & Menu</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff;
+    }
+
+    header {
+      background-color: #d35400;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+    }
+
+    header h1 {
+      margin-bottom: 10px;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    nav ul li a:hover {
+      color: #f1c40f;
+    }
+
+    .hero {
+      background-image: url('salad.jpg'); /* replace with your actual image filename */
+      background-size: cover;
+      background-position: center;
+      height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero h2 {
+      font-size: 36px;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
+
+    .content {
+      padding: 40px 20px;
+      text-align: center;
+      background-color: #fffaf0;
+    }
+
+    .content h3 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .content p {
+      margin-bottom: 20px;
+      color: #555;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .btn-group a {
+      text-decoration: none;
+      padding: 12px 25px;
+      background-color: #d35400;
+      color: white;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .btn-group a:hover {
+      background-color: #a04000;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+      margin-top: 50px;
+    }
+  </style>
 </head>
 <body>
+
   <header>
-    <h1>DineSmart Restaurant Reservation</h1>
+    <h1>Dinesmart</h1>
     <nav>
       <ul>
-        <li><a href="booktable.html">Book Table</a></li>
-        <li><a href="menu.php">View Menu</a></li>
-        <li><a href="admin-login.html">Admin Login</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="menu.php">Menu</a></li>
+        <li><a href="booktable.html">Book a Table</a></li>
+        <li><a href="admin-login.html">Admin</a></li>
       </ul>
     </nav>
   </header>
 
-  <main>
-    <section class="hero">
-      <h2>Delicious Food, Easy Booking</h2>
-      <p>Reserve your table online and enjoy amazing Nepali veg & chicken dishes.</p>
+  <section class="hero">
+    <h2>Welcome to Our Restaurant</h2>
+  </section>
 
-    </section>
-  </main>
+  <section class="content">
+    <h3>Delicious Food & Great Ambience</h3>
+    <p>Experience the best dining with fresh ingredients and exceptional service. Browse our menu and book your table online!</p>
+    <div class="btn-group">
+      <a href="menu.php">View Menu</a>
+      <a href="booktable.html">Book a Table</a>
+    </div>
+  </section>
 
   <footer>
-    <p>&copy; 2025 DineSmart Restaurant. All rights reserved.</p>
+    <p>&copy;© 2025 DineSmart Restaurant. All rights reserved.</p>
   </footer>
+
 </body>
 </html>
