@@ -134,7 +134,8 @@ $items = $conn->query("SELECT id, name, price FROM menu_items ORDER BY name");
   <p>&copy; 2025 DineSmart Restaurant. All rights reserved.</p>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <script>
 let billItems = [];
 
@@ -216,39 +217,64 @@ function removeItem(index) {
   updateTable();
 }
 function downloadPDF() {
-  if (!window.verifiedToken) {
-    alert("Please verify your booking token before downloading the bill.");
+  if (!window.verifiedToken || billItems.length === 0) {
+    alert('Please verify token and add items first.');
     return;
   }
 
-  if (billItems.length === 0) {
-    alert("Please add items to the bill before downloading.");
-    return;
-  }
+  // Create temporary container for PDF content
+  const container = document.createElement('div');
+  container.style.padding = '20px';
+  let html = `<h2 style="text-align:center;">DineSmart Restaurant - Customer Bill</h2>`;
+  html += `<p><strong>Booking Token:</strong> ${window.verifiedToken}</p>`;
+  html += `<p><strong>Customer Name:</strong> ${window.verifiedName}</p>`;
+  html += `<p><strong>Phone Number:</strong> ${window.verifiedPhone}</p>`;
+  html += `<table border="1" cellspacing="0" cellpadding="5" width="100%">
+             <thead><tr>
+               <th>Item</th><th>Price</th><th>Qty</th><th>Total</th>
+             </tr></thead><tbody>`;
 
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  let y = 20;
-
-  doc.setFontSize(16);
-  doc.text("DineSmart Restaurant - Customer Bill", 20, y); y += 10;
-  doc.setFontSize(12);
-  doc.text(`Booking Token: ${window.verifiedToken}`, 20, y); y += 8;
-  doc.text(`Customer Name: ${window.verifiedName}`, 20, y); y += 8;
-  doc.text(`Phone Number: ${window.verifiedPhone}`, 20, y); y += 10;
-
-  billItems.forEach((item, i) => {
-    doc.text(`${i + 1}. ${item.name} - Rs. ${item.price} x ${item.qty} = Rs. ${item.total.toFixed(2)}`, 20, y);
-    y += 8;
+  billItems.forEach(item => {
+    html += `<tr>
+      <td>${item.name}</td>
+      <td>Rs. ${item.price.toFixed(2)}</td>
+      <td>${item.qty}</td>
+      <td>Rs. ${item.total.toFixed(2)}</td>
+    </tr>`;
   });
 
   const grand = billItems.reduce((sum, i) => sum + i.total, 0);
-  doc.text(`-----------------------------------------`, 20, y); y += 8;
-  doc.text(`Grand Total: Rs. ${grand.toFixed(2)}`, 20, y);
+  html += `</tbody></table><p><strong>Grand Total:</strong> Rs. ${grand.toFixed(2)}</p>`;
+  container.innerHTML = html;
+  document.body.appendChild(container);
 
-  doc.save("DineSmart_Bill.pdf");
+  // Generate and upload PDF
+  html2pdf().from(container).set({
+    margin: 0.5,
+    filename: `${window.verifiedToken}.pdf`,
+    jsPDF: { unit: 'mm', format: 'a4' }
+  }).outputPdf('blob').then(blob => {
+    const form = new FormData();
+    form.append('pdf', blob);
+    form.append('token', window.verifiedToken);
+    form.append('name', window.verifiedName);
+    form.append('phone', window.verifiedPhone);
+    form.append('items', JSON.stringify(billItems));
+    form.append('total', grand);
+
+    return fetch('save_pdf.php', {
+      method: 'POST',
+      body: form
+    });
+  }).then(() => {
+    alert("✅ Bill saved and PDF generated successfully.");
+  }).catch(err => {
+    console.error(err);
+    alert("❌ Failed to save PDF.");
+  }).finally(() => {
+    document.body.removeChild(container);
+  });
 }
-
 
 </script>
 
