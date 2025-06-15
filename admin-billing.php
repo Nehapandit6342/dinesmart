@@ -222,9 +222,9 @@ function downloadPDF() {
     return;
   }
 
-  // Create temporary container for PDF content
   const container = document.createElement('div');
   container.style.padding = '20px';
+
   let html = `<h2 style="text-align:center;">DineSmart Restaurant - Customer Bill</h2>`;
   html += `<p><strong>Booking Token:</strong> ${window.verifiedToken}</p>`;
   html += `<p><strong>Customer Name:</strong> ${window.verifiedName}</p>`;
@@ -248,12 +248,15 @@ function downloadPDF() {
   container.innerHTML = html;
   document.body.appendChild(container);
 
-  // Generate and upload PDF
-  html2pdf().from(container).set({
+  const opt = {
     margin: 0.5,
     filename: `${window.verifiedToken}.pdf`,
     jsPDF: { unit: 'mm', format: 'a4' }
-  }).outputPdf('blob').then(blob => {
+  };
+
+  // Step 1: Generate PDF blob
+  html2pdf().from(container).set(opt).outputPdf('blob').then(blob => {
+    // Step 2: Upload to server
     const form = new FormData();
     form.append('pdf', blob);
     form.append('token', window.verifiedToken);
@@ -265,12 +268,13 @@ function downloadPDF() {
     return fetch('save_pdf.php', {
       method: 'POST',
       body: form
+    }).then(() => {
+      // Step 3: Trigger download using html2pdf save()
+      html2pdf().from(container).set(opt).save(); // ✅ force download
     });
-  }).then(() => {
-    alert("✅ Bill saved and PDF generated successfully.");
   }).catch(err => {
     console.error(err);
-    alert("❌ Failed to save PDF.");
+    alert("❌ Failed to save and download PDF.");
   }).finally(() => {
     document.body.removeChild(container);
   });
