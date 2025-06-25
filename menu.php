@@ -1,16 +1,44 @@
 <?php
+session_start();
 $host = "localhost";
 $user = "root";
 $pass = "";
 $db = "dinesmart";
 
-// Connect to DB
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch all menu items
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_to_cart'])) {
+  $item_id = $_POST['item_id'];
+  $quantity = intval($_POST['quantity']);
+  $query = "SELECT * FROM menu_items WHERE id = $item_id";
+  $result = $conn->query($query);
+  if ($row = $result->fetch_assoc()) {
+    $item = [
+      'id' => $row['id'],
+      'name' => $row['name'],
+      'price' => $row['price'],
+      'quantity' => $quantity
+    ];
+
+    if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
+
+    $found = false;
+    foreach ($_SESSION['cart'] as &$cartItem) {
+      if ($cartItem['id'] == $item['id']) {
+        $cartItem['quantity'] += $quantity;
+        $found = true;
+        break;
+      }
+    }
+    if (!$found) {
+      $_SESSION['cart'][] = $item;
+    }
+  }
+}
+
 $sql = "SELECT * FROM menu_items ORDER BY category, name";
 $result = $conn->query($sql);
 ?>
@@ -19,7 +47,6 @@ $result = $conn->query($sql);
 <html>
 <head>
   <title>Our Menu - DineSmart</title>
-  <link rel="stylesheet" href="style.css">
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -72,7 +99,7 @@ $result = $conn->query($sql);
 
     .menu-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 25px;
     }
 
@@ -90,12 +117,13 @@ $result = $conn->query($sql);
 
     .menu-card img {
       width: 100%;
-      height: 170px;
+      height: 180px;
       object-fit: cover;
     }
 
     .menu-card-body {
       padding: 15px;
+      background-color: #fff;
     }
 
     .menu-item-name {
@@ -115,6 +143,25 @@ $result = $conn->query($sql);
       font-size: 14px;
       color: #666;
       margin-top: 5px;
+    }
+
+    .add-form {
+      margin-top: 10px;
+    }
+
+    .add-form input[type='number'] {
+      width: 60px;
+      padding: 5px;
+    }
+
+    .add-form button {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      margin-top: 8px;
+      cursor: pointer;
     }
 
     footer {
@@ -138,6 +185,10 @@ $result = $conn->query($sql);
   </nav>
 </header>
 
+<div style="text-align:center; margin-top:20px;">
+  <a href="cart.php" style="background:#2980b9; color:white; padding:10px 20px; border-radius:5px; text-decoration:none;">🛒 View Cart</a>
+</div>
+
 <main>
   <div class="menu-container">
     <?php
@@ -151,19 +202,19 @@ $result = $conn->query($sql);
         }
 
         echo "<div class='menu-card'>";
-        if (!empty($row['image'])) {
-          echo "<img src='" . htmlspecialchars($row['image']) . "' alt='" . htmlspecialchars($row['name']) . "'>";
-        } else {
-          echo "<img src='images/default.jpg' alt='No image'>";
-        }
-
+        echo "<img src='" . (!empty($row['image']) ? htmlspecialchars($row['image']) : 'images/default.jpg') . "' alt='" . htmlspecialchars($row['name']) . "'>";
         echo "<div class='menu-card-body'>";
         echo "<div class='menu-item-name'>" . htmlspecialchars($row['name']) . "</div>";
         echo "<div class='menu-item-desc'>" . htmlspecialchars($row['description']) . "</div>";
         echo "<div class='menu-item-price'>Rs. " . number_format($row['price'], 2) . "</div>";
+        echo "<form method='POST' class='add-form'>";
+        echo "<input type='hidden' name='item_id' value='" . $row['id'] . "'>";
+        echo "<label>Qty: <input type='number' name='quantity' min='1' value='1' required></label><br>";
+        echo "<button type='submit' name='add_to_cart'>Add to Cart</button>";
+        echo "</form>";
         echo "</div></div>";
       }
-      echo "</div></div>"; // Close last grid and category
+      echo "</div>"; // Close last menu-grid
     } else {
       echo "<p>No menu items found.</p>";
     }
@@ -171,7 +222,6 @@ $result = $conn->query($sql);
     ?>
   </div>
 </main>
-
 
 <footer>
   <p>&copy; 2025 DineSmart Restaurant. All rights reserved.</p>
