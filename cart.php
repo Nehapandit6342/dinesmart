@@ -99,9 +99,10 @@ $total = 0;
     </tr>
   </table>
 
-  <div class="center">
-    <h3>📱 Scan to Pay (Prabhu Bank)</h3>
-    <img class="qr-img" src="QRcode.jpg" alt="QR Code for payment">
+  <div style="text-align: center; margin-top: 30px;">
+  <h3>Scan to Pay (Prepayment)</h3>
+  <img src="images/QRcode.jpg" alt="QR Code for Payment" style="width: 250px; height: 250px; object-fit: contain; border: 2px solid #ccc; border-radius: 10px;">
+  <p style="margin-top: 10px; color: #444;">Please scan this QR to pay 50% of your bill and confirm your booking.</p>
 
     <form action="confirm-booking.php" method="POST">
       <input type="hidden" name="total" value="<?= $total ?>">
