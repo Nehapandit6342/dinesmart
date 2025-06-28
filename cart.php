@@ -104,11 +104,18 @@ $total = 0;
   <img src="images/QRcode.jpg" alt="QR Code for Payment" style="width: 250px; height: 250px; object-fit: contain; border: 2px solid #ccc; border-radius: 10px;">
   <p style="margin-top: 10px; color: #444;">Please scan this QR to pay 50% of your bill and confirm your booking.</p>
 
-    <form action="confirm-booking.php" method="POST">
-      <input type="hidden" name="total" value="<?= $total ?>">
-      <input type="hidden" name="prepayment" value="<?= $total * 0.5 ?>">
-      <button class="btn" type="submit">✔️ I have paid, Confirm Booking</button>
-    </form>
+  <form action="confirm-booking.php" method="POST">
+  <input type="hidden" name="name" value="<?= $_SESSION['customer_name'] ?? '' ?>">
+  <input type="hidden" name="phone" value="<?= $_SESSION['customer_phone'] ?? '' ?>">
+  <input type="hidden" name="date" value="<?= $_SESSION['customer_date'] ?? '' ?>">
+  <input type="hidden" name="time" value="<?= $_SESSION['customer_time'] ?? '' ?>">
+  <input type="hidden" name="guests" value="<?= $_SESSION['customer_guests'] ?? '' ?>">
+  <input type="hidden" name="total" value="<?= $total ?>">
+  <input type="hidden" name="prepayment" value="<?= $total * 0.5 ?>">
+  <button class="btn" type="submit">✔️ I have paid, Confirm Booking</button>
+</form>
+
+
   </div>
 <?php endif; ?>
 
