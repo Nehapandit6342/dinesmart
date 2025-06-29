@@ -34,6 +34,13 @@ $stmt = $conn->prepare("INSERT INTO bookings (name, date, time, guests, phone, t
 $stmt->bind_param("sssissds", $name, $date, $time, $guests, $phone, $total_amount, $prepayment, $token);
 
 if ($stmt->execute()) {
+  $_SESSION['booking_confirmed'] = true;
+  // After successful insert
+$_SESSION['bill_token'] = $token;
+$_SESSION['bill_cart'] = $cart;
+$_SESSION['bill_total'] = $total_amount;
+$_SESSION['bill_prepayment'] = $prepayment;
+
     // Clear session
     unset($_SESSION['cart']);
     unset($_SESSION['customer_name']);
@@ -41,6 +48,7 @@ if ($stmt->execute()) {
     unset($_SESSION['customer_date']);
     unset($_SESSION['customer_time']);
     unset($_SESSION['customer_guests']);
+    
 } else {
     die("❌ Error saving booking: " . $conn->error);
 }
