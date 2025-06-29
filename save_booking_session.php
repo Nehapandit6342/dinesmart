@@ -8,14 +8,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $_SESSION['customer_time'] = $_POST['time'] ?? '';
     $_SESSION['customer_guests'] = $_POST['guests'] ?? '';
 
-    // Redirect to cart if cart is not empty, else go to menu
-    if (!empty($_SESSION['cart'])) {
-        header("Location: cart.php");
-    } else {
-        header("Location: menu.php");
+    if (!$_SESSION['customer_name'] || !$_SESSION['customer_phone'] || !$_SESSION['customer_date'] || !$_SESSION['customer_time'] || !$_SESSION['customer_guests']) {
+        die("❌ Missing booking details.");
     }
+
+    // Mark booking info saved
+    $_SESSION['booking_info_saved'] = true;
+
+    header("Location: cart.php");
     exit;
 } else {
-    echo "❌ Invalid request.";
+    echo "❌ Invalid access method.";
 }
-?>
