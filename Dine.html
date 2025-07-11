@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Login - DineSmart</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .login-container {
+      max-width: 400px;
+      margin: 60px auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .login-container h2 {
+      text-align: center;
+      color: #c0392b;
+      margin-bottom: 20px;
+    }
+
+    .login-container label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background-color: #27ae60;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .login-container button:hover {
+      background-color: #219150;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>DineSmart Admin</h1>
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="menu.php">View Menu</a></li>
+      <li><a href="booktable.html">Book Table</a></li>
+ <li><a href="billing.php">Billing</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <div class="login-container">
+    <h2>Admin Login</h2>
+    <form onsubmit="return handleLogin()">
+  <label for="username">Username</label>
+  <input type="text" id="username" required>
+
+  <label for="password">Password</label>
+  <input type="password" id="password" required>
+
+  <button type="submit">Login</button>
+</form>
+
+<script>
+function handleLogin() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  // TEMPORARY: default login
+  if (username === "admin" && password === "admin123") {
+    window.location.href = "admin-dashboard.html";
+  } else {
+    alert("Invalid login. Try admin / admin123");
+  }
+
+  return false; // Prevent form submission
+}
+</script>
+
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2025 DineSmart Restaurant. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
