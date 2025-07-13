@@ -93,7 +93,7 @@ $items = $conn->query("SELECT id, name, price FROM menu_items ORDER BY name");
 <main>
   <div class="billing-container">
     <label for="booking-token">Booking Token</label>
-<input type="text" id="booking-token" placeholder="Enter Booking Token" maxlength="6" style="text-transform:uppercase;">
+<input type="text" id="booking-token" placeholder="Enter Booking Token" maxlength="8" style="text-transform:uppercase;">
 <button class="btn" onclick="verifyToken()">Verify Token</button>
 
 <div id="token-message" style="margin:10px 0; font-weight:bold;"></div>
@@ -150,20 +150,34 @@ function verifyToken() {
   }
 
   fetch('verify_token.php?token=' + token)
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
       if (data.valid) {
-        msg.textContent = `Token valid! Name: ${data.name}, Phone: ${data.phone}`;
+        msg.textContent = Token valid! Name: ${data.name}, Phone: ${data.phone};
         msg.style.color = "green";
         window.verifiedToken = token;
         window.verifiedName = data.name;
-        window.verifiedPhone = data.phone; // ✅ NEW
+        window.verifiedPhone = data.phone;
+        window.verifiedPrepaid = data.prepaid;
+
+        billItems = [];
+        if (Array.isArray(data.items)) {
+          data.items.forEach(item => {
+            billItems.push({
+              name: item.name,
+              price: parseFloat(item.price),
+              qty: parseInt(item.quantity),
+              total: parseFloat(item.price) * parseInt(item.quantity)
+            });
+          });
+        }
+        updateTable();
       } else {
         msg.textContent = "Invalid token!";
         msg.style.color = "red";
         window.verifiedToken = null;
-        window.verifiedName = null;
-        window.verifiedPhone = null;
+        billItems = [];
+        updateTable();
       }
     })
     .catch(err => {
@@ -173,11 +187,49 @@ function verifyToken() {
     });
 }
 
+
+function updateTable() {
+  const tbody = document.querySelector("#bill-table tbody");
+  tbody.innerHTML = "";
+  let grandTotal = 0;
+
+  billItems.forEach((item, index) => {
+    const price = parseFloat(item.price);
+    const total = parseFloat(item.total);
+
+    if (isNaN(price) || isNaN(total)) return;
+
+    grandTotal += total;
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${item.name}</td>
+        <td>Rs. ${price.toFixed(2)}</td>
+        <td>${item.qty}</td>
+        <td>Rs. ${total.toFixed(2)}</td>
+        <td><button onclick="removeItem(${index})">X</button></td>
+      </tr>
+    `;
+  });
+
+let adjustedTotal = grandTotal;
+let prepaid = parseFloat(window.verifiedPrepaid) || 0;
+adjustedTotal -= prepaid;
+if (adjustedTotal < 0) adjustedTotal = 0;
+
+document.getElementById("grand-total").innerHTML =
+  `<div>Total: Rs. ${grandTotal.toFixed(2)}</div>
+   <div>Prepaid (Advance): Rs. ${prepaid.toFixed(2)}</div>
+   <div><strong>Amount to Pay: Rs. ${adjustedTotal.toFixed(2)}</strong></div>`;
+
+}
+
 function addItem() {
-   if (!window.verifiedToken) {
+  if (!window.verifiedToken) {
     alert("Please verify your booking token before adding items.");
     return;
   }
+
   const select = document.getElementById("item-select");
   const qty = parseInt(document.getElementById("quantity").value);
   const id = select.value;
@@ -189,27 +241,6 @@ function addItem() {
   const total = price * qty;
   billItems.push({ name, price, qty, total });
   updateTable();
-}
-
-function updateTable() {
-  const tbody = document.querySelector("#bill-table tbody");
-  tbody.innerHTML = "";
-  let grandTotal = 0;
-
-  billItems.forEach((item, index) => {
-    grandTotal += item.total;
-    tbody.innerHTML += `
-      <tr>
-        <td>${item.name}</td>
-        <td>Rs. ${item.price.toFixed(2)}</td>
-        <td>${item.qty}</td>
-        <td>Rs. ${item.total.toFixed(2)}</td>
-        <td><button onclick="removeItem(${index})">X</button></td>
-      </tr>
-    `;
-  });
-
-  document.getElementById("grand-total").textContent = "Grand Total: Rs. " + grandTotal.toFixed(2);
 }
 
 function removeItem(index) {
@@ -224,60 +255,57 @@ function downloadPDF() {
 
   const container = document.createElement('div');
   container.style.padding = '20px';
-
-  let html = `<h2 style="text-align:center;">DineSmart Restaurant - Customer Bill</h2>`;
-  html += `<p><strong>Booking Token:</strong> ${window.verifiedToken}</p>`;
-  html += `<p><strong>Customer Name:</strong> ${window.verifiedName}</p>`;
-  html += `<p><strong>Phone Number:</strong> ${window.verifiedPhone}</p>`;
-  html += `<table border="1" cellspacing="0" cellpadding="5" width="100%">
+ container.style.width = '100%'; // ✅ Make it full width
+ container.style.minHeight = '500px'; // ✅ Add this
+container.style.boxSizing = 'border-box'; // ✅ Ensure layout doesn't break
+  let html = <h2 style="text-align:center;">DineSmart Restaurant - Customer Bill</h2>;
+  html += <p><strong>Booking Token:</strong> ${window.verifiedToken}</p>;
+  html += <p><strong>Customer Name:</strong> ${window.verifiedName}</p>;
+  html += <p><strong>Phone Number:</strong> ${window.verifiedPhone}</p>;
+  html += `<table border="1" cellspacing="0" cellpadding="5" width="100%" style="border-collapse:collapse;">
              <thead><tr>
                <th>Item</th><th>Price</th><th>Qty</th><th>Total</th>
              </tr></thead><tbody>`;
 
+  let grandTotal = 0;
+
   billItems.forEach(item => {
+    const itemTotal = item.price * item.qty;
+    grandTotal += itemTotal;
+
     html += `<tr>
       <td>${item.name}</td>
       <td>Rs. ${item.price.toFixed(2)}</td>
       <td>${item.qty}</td>
-      <td>Rs. ${item.total.toFixed(2)}</td>
+      <td>Rs. ${itemTotal.toFixed(2)}</td>
     </tr>`;
   });
 
-  const grand = billItems.reduce((sum, i) => sum + i.total, 0);
-  html += `</tbody></table><p><strong>Grand Total:</strong> Rs. ${grand.toFixed(2)}</p>`;
+  const prepaid = parseFloat(window.verifiedPrepaid) || 0;
+  let finalTotal = grandTotal - prepaid;
+  if (finalTotal < 0) finalTotal = 0;
+
+  html += `</tbody></table>
+  <p><strong>Total:</strong> Rs. ${grandTotal.toFixed(2)}</p>
+  <p><strong>Prepaid (Advance):</strong> Rs. ${prepaid.toFixed(2)}</p>
+  <p><strong>Amount to Pay:</strong> Rs. ${finalTotal.toFixed(2)}</p>`;
+
   container.innerHTML = html;
+  
   document.body.appendChild(container);
 
-  const opt = {
-    margin: 0.5,
-    filename: `${window.verifiedToken}.pdf`,
-    jsPDF: { unit: 'mm', format: 'a4' }
-  };
+  setTimeout(() => {
+    const opt = {
+      margin: 0.5,
+      filename: dinesmart_bill_${window.verifiedToken}.pdf,
+      jsPDF: { unit: 'mm', format: 'a4' },
+      html2canvas: { scale: 2 },
+    };
 
-  // Step 1: Generate PDF blob
-  html2pdf().from(container).set(opt).outputPdf('blob').then(blob => {
-    // Step 2: Upload to server
-    const form = new FormData();
-    form.append('pdf', blob);
-    form.append('token', window.verifiedToken);
-    form.append('name', window.verifiedName);
-    form.append('phone', window.verifiedPhone);
-    form.append('items', JSON.stringify(billItems));
-    form.append('total', grand);
-
-    return fetch('save_pdf.php', {
-      method: 'POST',
-      body: form
-    }).then(() => {
-      // Step 3: Trigger download using html2pdf save()
-      html2pdf().from(container).set(opt).save(); // ✅ force download
+    html2pdf().from(container).set(opt).save().then(() => {
+      document.body.removeChild(container);
     });
-  }).catch(err => {
-    console.error(err);
-    alert("❌ Failed to save and download PDF.");
-  }).finally(() => {
-    document.body.removeChild(container);
-  });
+  }, 800); // delay to ensure rendering
 }
 
 </script>
