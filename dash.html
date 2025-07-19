@@ -1,0 +1,111 @@
+<?php
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db = "dinesmart";
+$conn = new mysqli($host, $user, $pass, $db);
+if ($conn->connect_error) {
+  die("Connection failed: " . $conn->connect_error);
+}
+
+$id = $_GET['id'] ?? null;
+if (!$id) {
+  die("❌ Invalid ID");
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $name = $_POST['name'];
+  $category = $_POST['category'];
+  $description = $_POST['description'];
+  $price = $_POST['price'];
+  $stock_status = $_POST['stock_status'];
+
+  $sql = "UPDATE `menu_items` SET name=?, category=?, description=?, price=?, stock_status=? WHERE id=?";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("sssdsi", $name, $category, $description, $price, $stock_status, $id);
+
+  if ($stmt->execute()) {
+    echo "<script>alert('✅ Item updated successfully!'); window.location.href='admin-menu.php';</script>";
+    exit();
+  } else {
+    echo "❌ Error updating item: " . $conn->error;
+  }
+}
+
+// Load existing item data
+$result = $conn->query("SELECT * FROM `menu_items` WHERE id=$id");
+$row = $result->fetch_assoc();
+if (!$row) die("❌ Item not found.");
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Menu Item</title>
+  <style>
+    body {
+      font-family: Arial;
+    }
+    form {
+      width: 450px;
+      margin: 50px auto;
+      padding: 30px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+    h2 {
+      text-align: center;
+      color: #c0392b;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      padding: 12px;
+      margin-top: 15px;
+      width: 100%;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2471a3;
+    }
+  </style>
+</head>
+<body>
+ <form method="POST" enctype="multipart/form-data">
+
+    <h2>Edit Menu Item</h2>
+
+    <label>Dish Name:</label>
+    <input type="text" name="name" value="<?= htmlspecialchars($row['name']) ?>" required>
+
+    <label>Category:</label>
+    <input type="text" name="category" value="<?= htmlspecialchars($row['category']) ?>" required>
+
+    <label>Description:</label>
+    <textarea name="description" required><?= htmlspecialchars($row['description']) ?></textarea>
+
+    <label>Price (Rs):</label>
+    <input type="number" step="0.01" name="price" value="<?= htmlspecialchars($row['price']) ?>" required>
+
+    <label>Stock Status:</label>
+    <select name="stock_status" required>
+      <option value="available" <?= $row['stock_status'] === 'available' ? 'selected' : '' ?>>Available</option>
+      <option value="out_of_stock" <?= $row['stock_status'] === 'out_of_stock' ? 'selected' : '' ?>>Out of Stock</option>
+    </select>
+
+    <button type="submit">💾 Update Item</button>
+  </form>
+</body>
+</html>
+
+<?php $conn->close(); ?>
