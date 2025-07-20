@@ -1,34 +1,35 @@
 <?php
 // Connect to database
 $conn = new mysqli("localhost", "root", "", "dinesmart");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $name = $_POST["name"];
-  $category = $_POST["category"];
-  $description = $_POST["description"];
-  $price = $_POST["price"];
+    $name = $_POST["name"];
+    $category = $_POST["category"];
+    $description = $_POST["description"];
+    $price = $_POST["price"];
+    $stock_status = $_POST["stock_status"];
 
-  // Handle image upload
-  $image_name = $_FILES["image"]["name"];
-  $image_tmp = $_FILES["image"]["tmp_name"];
-  $image_path = "images/" . $image_name;
+  $image_name = basename($_FILES["image"]["name"]);
+$image_tmp = $_FILES["image"]["tmp_name"];
+$image_path = "images/" . $image_name;
 
-  move_uploaded_file($image_tmp, $image_path);
+if (move_uploaded_file($image_tmp, $image_path)) {
+    // store only file name in DB
+    $stmt = $conn->prepare("INSERT INTO menu_items (name, category, description, price, image, stock_status) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssss", $name, $category, $description, $price, $image_name, $stock_status);
 
-  // Insert into DB
-$stmt = $conn->prepare("INSERT INTO menu_items (name, category, description, price, image) VALUES (?, ?, ?, ?, ?)");
-
-
-if ($stmt === false) {
-  die("Prepare failed: " . $conn->error);
-}
-
-$stmt->bind_param("sssds", $name, $category, $description, $price, $image_name);
-$stmt->execute();
-
-
-  echo "<p style='color: green; text-align:center;'>Menu item added successfully!</p>";
+        if ($stmt->execute()) {
+            echo "<p style='color: green; text-align:center;'>✅ Menu item added successfully!</p>";
+        } else {
+            echo "<p style='color: red; text-align:center;'>❌ Error: " . $stmt->error . "</p>";
+        }
+    } else {
+        echo "<p style='color:red; text-align:center;'>❌ Failed to upload image.</p>";
+    }
 }
 ?>
 
@@ -43,12 +44,17 @@ $stmt->execute();
       padding: 20px;
       max-width: 600px;
       margin: auto;
+      background: #f5f5f5;
     }
     h2 {
       text-align: center;
       color: #c0392b;
     }
     form {
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: column;
       gap: 15px;
@@ -65,6 +71,7 @@ $stmt->execute();
       border: none;
       font-weight: bold;
       border-radius: 5px;
+      cursor: pointer;
     }
     button:hover {
       background: #219150;
@@ -73,17 +80,17 @@ $stmt->execute();
 </head>
 <body>
 
-<h2>Add Menu Item</h2>
+<h2>Add New Menu Item</h2>
 <form action="" method="POST" enctype="multipart/form-data">
   <label>Dish Name:</label>
   <input type="text" name="name" required>
 
   <label>Category:</label>
   <select name="category" required>
-    <option value="Veg">Veg</option>
-    <option value="Chicken">Chicken</option>
-    <option value="Beverage">Beverage</option>
+    <option value="Starter">Starter</option>
+    <option value="Main Course">Main Course</option>
     <option value="Dessert">Dessert</option>
+    <option value="Beverages">Beverages</option>
   </select>
 
   <label>Description:</label>
@@ -95,7 +102,13 @@ $stmt->execute();
   <label>Upload Image:</label>
   <input type="file" name="image" accept="image/*" required>
 
-  <button type="submit">Add Item</button>
+  <label>Stock Status:</label>
+  <select name="stock_status" required>
+    <option value="available">Available</option>
+    <option value="out_of_stock">Out of Stock</option>
+  </select>
+
+  <button type="submit">➕ Add Item</button>
 </form>
 
 </body>
